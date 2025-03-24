@@ -1,0 +1,17 @@
+{
+    "name": "rylan/azuracast_jukebox",
+    "description": "A azuracast plugin that serves a React SPA to connect to every station on one page",
+    "type": "azuracast-plugin",
+    "authors": [
+        {
+            "name": "Rylan Cook",
+            "email": "no@no.ca"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Plugin\\AzuraJukebox\\": "src"
+        }
+    },
+    "require": {}
+}

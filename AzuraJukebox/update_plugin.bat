@@ -1,0 +1,1 @@
+robocopy /S /PURGE . \\TOWER\appdata\azuracast\plugins\AzuraJukebox

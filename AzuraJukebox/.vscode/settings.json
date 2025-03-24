@@ -1,0 +1,7 @@
+{
+    "emeraldwalk.runonsave" : {
+        "commands": [{
+            "cmd": "cmd /c .\\update_plugin.bat"
+        }]
+    }
+}

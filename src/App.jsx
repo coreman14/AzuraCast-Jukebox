@@ -45,9 +45,6 @@ function App() {
             let data = await response.json();
             data = data.map((x) => {return {'now_playing': x.now_playing, ...x.station}}).sort((a, b) => a.id - b.id)
             setStations(data);
-            if (selectedStation == null) {
-                setSelectedStation(data[0]);
-            }
             setServerError(false);
             setServerErrorMessage("");
         } catch (error) {

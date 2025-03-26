@@ -35,13 +35,15 @@ function App() {
 
     const validateServer = useCallback(async () => {
         try {
+            console.log("Getting new servers")
             setIsAzuracastServerBeingChecked(true);
             setServerError(false);
             setServerErrorMessage("");
-            const response = await fetch(azuracastServer + "/api/stations", {
+            const response = await fetch(azuracastServer + "/api/nowplaying", {
                 headers: { "accept": "application/json" },
             });
-            const data = await response.json();
+            let data = await response.json();
+            data = data.map((x) => {return {'now_playing': x.now_playing, ...x.station}}).sort((a, b) => a.id - b.id)
             setStations(data);
             if (selectedStation == null) {
                 setSelectedStation(data[0]);
@@ -112,6 +114,19 @@ function App() {
     useEffect(() => {
         debouncedValidate(azuracastServer);
     }, [azuracastServer, debouncedValidate, forcePoll]);
+
+    useEffect(() => {
+        // Initial validation
+        debouncedValidate(azuracastServer);
+        
+        // Set up polling every 5 seconds
+        const pollInterval = setInterval(() => {
+            validateServer();
+        }, 5000);
+
+        // Cleanup on unmount
+        return () => clearInterval(pollInterval);
+    }, [azuracastServer, debouncedValidate]);
 
     useEffect(() => {
         if (currentAudio) currentAudio.volume = volumeLevel;
@@ -245,7 +260,10 @@ function App() {
                                         selectRef.current.click();
                                     }}
                                 >
-                                    {station.name}
+                                    <div className="station-name">{station.name}</div>
+                                    <div className="station-now-playing">
+                                        {station.now_playing?.song?.title} - {station.now_playing?.song?.artist}
+                                    </div>
                                 </button>
                             ))
                         )}

@@ -5,8 +5,8 @@ import debounce from "lodash/debounce";
 function App() {
     const selectRef = useRef(null);
     const [azuracastServer, setAzuracastServer] = useState(localStorage.getItem("aurl"));
-    const [servedFromAzuracast, setServedFromAzuracast] = useState(false)
-        // localStorage.getItem("servedfromserver") == "true" || false);
+    const [servedFromAzuracast, setServedFromAzuracast] = useState(false);
+    // localStorage.getItem("servedfromserver") == "true" || false);
     const [isAzuracastServerBeingChecked, setIsAzuracastServerBeingChecked] = useState(false);
     const [serverError, setServerError] = useState(false);
     const [serverErrorMessage, setServerErrorMessage] = useState("");
@@ -35,7 +35,7 @@ function App() {
 
     const validateServer = useCallback(async () => {
         try {
-            console.log("Getting new servers")
+            console.log("Getting new servers");
             setIsAzuracastServerBeingChecked(true);
             setServerError(false);
             setServerErrorMessage("");
@@ -43,7 +43,11 @@ function App() {
                 headers: { "accept": "application/json" },
             });
             let data = await response.json();
-            data = data.map((x) => {return {'now_playing': x.now_playing, ...x.station}}).sort((a, b) => a.id - b.id)
+            data = data
+                .map((x) => {
+                    return { "now_playing": x.now_playing, ...x.station };
+                })
+                .sort((a, b) => a.id - b.id);
             setStations(data);
             setServerError(false);
             setServerErrorMessage("");
@@ -92,16 +96,16 @@ function App() {
         currentAudio.play();
         startPollingSongInfo();
         setCurrentlyPlaying(true);
-    })
+    });
     navigator.mediaSession.setActionHandler("pause", () => {
         currentAudio.pause();
         stopPollingSongInfo();
         setCurrentSong(null);
         setCurrentlyPlaying(false);
-    })
+    });
     useEffect(() => {
         return () => {
-            navigator.mediaSession
+            navigator.mediaSession;
             if (pollInterval) {
                 stopPollingSongInfo();
             }
@@ -115,7 +119,7 @@ function App() {
     useEffect(() => {
         // Initial validation
         debouncedValidate(azuracastServer);
-        
+
         // Set up polling every 5 seconds
         const pollInterval = setInterval(() => {
             validateServer();
@@ -154,7 +158,7 @@ function App() {
                             : "Connected"
                     }
                 >
-                    <span style={{display: "none"}}>Icons obtained from https://icons8.com/</span>
+                    <span style={{ display: "none" }}>Icons obtained from https://icons8.com/</span>
                     <img
                         onClick={() => setForcePoll((a) => a + 1)}
                         style={{ float: "right" }}
@@ -165,10 +169,8 @@ function App() {
                     <div className="innerHeader">
                         <h1>AzuraCast Jukebox</h1>
                         {/* style={{ display: servedFromAzuracast ? "none" : "" }} */}
-                        <div className="headerInput" >
-                            <label htmlFor="severEndpoint">
-                                AzuraCast Server URL
-                            </label>
+                        <div className="headerInput">
+                            <label htmlFor="severEndpoint">AzuraCast Server URL</label>
                             <input
                                 type="text"
                                 name="severEndpoint"
@@ -288,7 +290,7 @@ function App() {
                         {currentAudio && (
                             <>
                                 <button
-                                    className={currentAudio.paused ? "" : "disabled" }
+                                    className={currentAudio.paused ? "" : "disabled"}
                                     style={{ backgroundColor: currentAudio.paused ? "" : "grey" }}
                                     ref={selectRef}
                                     onClick={() => {
@@ -301,7 +303,7 @@ function App() {
                                     Play
                                 </button>
                                 <button
-                                    className={currentAudio.paused ? "disabled" : "" }
+                                    className={currentAudio.paused ? "disabled" : ""}
                                     style={{ backgroundColor: currentAudio.paused ? "grey" : "" }}
                                     onClick={() => {
                                         currentAudio.pause();
@@ -315,21 +317,31 @@ function App() {
                             </>
                         )}
                     </div>
+                    <div className="volume-control">
+                        <progress
+                            title="Click or scroll to change volume. Holding Shift while scrolling will increase change amout"
+                            value={volumeLevel}
+                            max={1.0}
+                            onClick={(e) => {
+                                const x = e.pageX - e.currentTarget.offsetLeft;
+                                const clickedValue = (x * e.currentTarget.max) / e.currentTarget.offsetWidth;
+                                localStorage.setItem("svolume", clickedValue);
+                                setVolumeLevel(clickedValue);
+                            }}
+                            onWheel={(e) => {
+                                const modi_value = e.shiftKey ? 0.05 : 0.01
+                                if (e.deltaY > 0) {
+                                    setVolumeLevel((a) => Math.max(a - modi_value, 0));
+                                } else {
+                                    console.log("Upsies");
+                                    setVolumeLevel((a) => Math.min(a + modi_value, 1.0));
+                                }
+                            }}
+                        ></progress>
+                        <span>{Math.ceil(volumeLevel * 100)}%</span>
+                    </div>
                     {currentAudio && (
                         <>
-                            <div className="volume-control">
-                                <progress
-                                    value={volumeLevel}
-                                    max={1.0}
-                                    onClick={(e) => {
-                                        const x = e.pageX - e.currentTarget.offsetLeft;
-                                        const clickedValue = (x * e.currentTarget.max) / e.currentTarget.offsetWidth;
-                                        localStorage.setItem("svolume", clickedValue);
-                                        setVolumeLevel(clickedValue);
-                                    }}
-                                ></progress>
-                                <span>{Math.ceil(volumeLevel * 100)}%</span>
-                            </div>
                             {currentSong && (
                                 <div className="now-playing">
                                     Now Playing: {currentSong.now_playing.song.title} -{" "}
